@@ -13,37 +13,54 @@ class FormStore {
   store: Istore;
   callbacks: ICallBacks;
   forceRootRender: Function;
-  constructor(forceRootRender: Function,initialValues:any) {
-    if (typeof initialValues ==="object") {
-      this.store = {...initialValues}
-    }else{
-      this.store = {}
-    }
+  fieldEntities: any[];
+  constructor(forceRootRender: Function) {
+    this.store = {};
     this.forceRootRender = forceRootRender;
-    
+
     this.callbacks = {};
+    this.fieldEntities = [];
   }
-  setFiledValue=<T>(name: string, value: T) =>{
+  registerFiled = (filed: any) => {
+    this.fieldEntities.push(filed);
+  };
+  private _noTifyFormItemUpdate = (name:string)=>{
+    this.fieldEntities.map((fied) => {
+      if (fied.name===name) {
+        fied.onStoreChange()
+      }
+    });
+  }
+  setInitialValues = (initialValues:any) => {
+    if (typeof initialValues === "object") {
+      this.store = { ...initialValues };
+    }
+  };
+  setFiledValue = <T>(name: string, value: T) => {
+  this._noTifyFormItemUpdate(name)
     this.store[name] = value as T;
-  }
-  setFiledsValue=(newStore: Istore) =>{
+  };
+  setFiledsValue = (newStore: Istore) => {
     this.store = { ...this.store, ...newStore };
-  }
-  getFiledValue=(name: string)=> {
+    this.fieldEntities.map((fied) => {
+        fied.onStoreChange()
+    })
+  };
+  getFiledValue = (name: string) => {
     return this.store[name];
-  }
-  getFiledsValue=()=> {
+  };
+  getFiledsValue = () => {
     return this.store;
-  }
-  setCallbacks=(callbacks: Function)=> {
+  };
+  setCallbacks = (callbacks: Function) => {
     this.callbacks = callbacks;
-  }
-  submit=()=> {
+  };
+  submit = () => {
     let { onFinish } = this.callbacks;
     if (onFinish) {
       onFinish(this.store);
     }
-  }
+  };
   getForm() {
     //将一些需要暴露的方法属性等暴露出去,而非直接暴力的返回this
     return {
@@ -52,14 +69,16 @@ class FormStore {
       setFiledValue: this.setFiledValue,
       setFiledsValue: this.setFiledsValue,
       setCallbacks: this.setCallbacks,
-      forceUpdate:this.forceRootRender,
+      setInitialValues: this.setInitialValues,
+      registerFiled: this.registerFiled,
+      forceUpdate: this.forceRootRender,
       submit: this.submit,
     };
   }
 }
 
-const useForm = ({initialValues}) => {
-  let formRef= useRef<IFormInstance|null>();
+const useForm = () => {
+  let formRef = useRef<IFormInstance | null>();
   const [, forceUpdate] = useState<any[]>([]);
   //单例模式
   if (!formRef.current) {
@@ -67,7 +86,7 @@ const useForm = ({initialValues}) => {
     const forceReRender = () => {
       forceUpdate([]);
     };
-    let formStore = new FormStore(forceReRender,initialValues);
+    let formStore = new FormStore(forceReRender);
     let formInstance: IFormInstance = formStore.getForm();
     formRef.current = formInstance;
   }

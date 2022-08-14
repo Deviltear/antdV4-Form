@@ -2,7 +2,7 @@
   最外层的Form 对象
 */
 
-import { FC } from "react";
+// import { useState } from "react";
 import FieldContext from "./FieldContext";
 import useForm from "./useForm";
 import { IFormInstance } from "./interface";
@@ -11,14 +11,21 @@ interface IFormProps extends React.HTMLAttributes<HTMLDivElement> {
     [key: string]: any;
   };
   onFinish: any;
+  form: IFormInstance;
 }
 const Form = (props: IFormProps) => {
-  const { initialValues, onFinish, children } = props;
+  const { initialValues, onFinish, children, form } = props;
+  let formInstance = form;
+  if (!form) {
+    let [newformInstance] = useForm() as [IFormInstance];
 
-  let [formInstance] = useForm({ initialValues }) as [IFormInstance];
+    formInstance = newformInstance;
+  }
+
   formInstance.setCallbacks({
     onFinish,
   });
+  formInstance.setInitialValues(initialValues);
   return (
     <form
       onSubmit={(e) => {

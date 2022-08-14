@@ -5,5 +5,7 @@ export interface IFormInstance {
   setFiledsValue: Function;
   setCallbacks: Function;
   submit: Function;
-  forceUpdate:Function
+  forceUpdate:Function;
+  setInitialValues:Function;
+  registerFiled:Function
 }
