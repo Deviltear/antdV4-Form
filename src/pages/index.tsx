@@ -1,8 +1,13 @@
 import { FormItem, Form } from "@/Components/rc-field-form";
 import useForm from "@/Components/rc-field-form/useForm";
 import { IFormInstance } from "@/Components/rc-field-form/interface";
+import { useDynamicList } from "@/Components/rc-field-form/hooks/useDynamicList";
+
 export default function HomePage() {
   let [formInstance] = useForm() as [IFormInstance];
+  const { list, push, resetList, remove } = useDynamicList([{ name: "David" }]);
+
+  console.log(list, "33");
   return (
     <div>
       <h2>Yay! Welcome to umi!</h2>
@@ -33,6 +38,14 @@ export default function HomePage() {
       >
         改变值
       </button>
+
+      <button onClick={() => resetList([])}>重置</button>
+
+      <button onClick={() => push({ age: 22, name: "lisi" })}>新增</button>
+      <button onClick={() => remove(list[0].uuId)}>删除</button>
+      {list.map((item) => {
+        return <div>{item.name}</div>;
+      })}
     </div>
   );
 }
